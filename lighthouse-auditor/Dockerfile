@@ -14,6 +14,17 @@
 
 FROM python:3.11-slim
 
+# Install system dependencies including Chromium
+RUN apt-get update && apt-get install -y \
+    chromium \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Lighthouse and Chrome Launcher
+RUN npm install -g lighthouse chrome-launcher
+
+# Install uv for Python package management
 RUN pip install --no-cache-dir uv==0.6.12
 
 WORKDIR /code
