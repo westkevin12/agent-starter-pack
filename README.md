@@ -1,6 +1,19 @@
 # 🚀 Agent Starter Pack
 
-![Version](https://img.shields.io/pypi/v/agent-starter-pack?color=blue) [![1-Minute Video Overview](https://img.shields.io/badge/1--Minute%20Overview-gray)](https://youtu.be/jHt-ZVD660g) [![Docs](https://img.shields.io/badge/Documentation-gray)](./docs/README.md) ![Stars](https://img.shields.io/github/stars/GoogleCloudPlatform/agent-starter-pack?color=yellow)
+![Version](https://img.shields.io/pypi/v/agent-starter-pack?color=blue) [![1-Minute Video Overview](https://img.shields.io/badge/1--Minute%20Overview-gray)](https://youtu.be/jHt-ZVD660g) [![Docs](https://img.shields.io/badge/Documentation-gray)](./docs/README.md) <a href="https://studio.firebase.google.com/new?template=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2Fagent-starter-pack%2Ftree%2Ffeat-add-firebase-studio-resources%2Fsrc%2Fresources%2Fidx">
+  <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://cdn.firebasestudio.dev/btn/try_light_20.svg">
+    <source
+      media="(prefers-color-scheme: light)"
+      srcset="https://cdn.firebasestudio.dev/btn/try_dark_20.svg">
+    <img
+      height="20"
+      alt="Try in Firebase Studio"
+      src="https://cdn.firebasestudio.dev/btn/try_blue_20.svg">
+  </picture>
+</a> ![Stars](https://img.shields.io/github/stars/GoogleCloudPlatform/agent-starter-pack?color=yellow)
 
 
 The `agent-starter-pack` is a collection of production-ready Generative AI Agent templates built for Google Cloud. <br>
@@ -28,16 +41,15 @@ agent-starter-pack create my-awesome-agent
 ```
 
 **That's it!** You now have a fully functional agent project—complete with backend, frontend, and deployment infrastructure—ready for you to explore and customize.
-For more installation options, see the [Installation Guide](docs/installation.md).
+For more installation options, see the [Installation Guide](docs/installation.md).  You can also [try it in Firebase Studio](https://studio.firebase.google.com/new?template=https%3A%2F%2Fgithub.com%2FGoogleCloudPlatform%2Fagent-starter-pack%2Ftree%2Fmain%2Fsrc%2Fresources%2Fidx) with zero setup.
 
 ---
 
  🆕 The starter pack offers full support for Agent Engine, a new fully managed solution to deploy agents. Simply run this command to get started:
 
 ```bash
-agent-starter-pack create my-agent -d agent_engine -a langgraph_base_react
+agent-starter-pack create my-agent -d agent_engine -a adk_base
 ```
-
 
 *See the [full list of options](docs/cli/create.md) for details.*
 
@@ -45,13 +57,17 @@ agent-starter-pack create my-agent -d agent_engine -a langgraph_base_react
 
 | Agent Name                  | Description                                                                                                                       |
 |-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `langgraph_base_react`      | A agent implementing a base ReAct agent using LangGraph |
-| `agentic_rag` | A RAG agent using LangGraph for document retrieval and Q&A. Supporting [Vertex AI Search](https://cloud.google.com/generative-ai-app-builder/docs/enterprise-search-introduction) and [Vector Search](https://cloud.google.com/vertex-ai/docs/vector-search/overview).       |
+| `adk_base`      | A base ReAct agent implemented using Google's [Agent Development Kit](https://github.com/google/adk-python) |
+| `agentic_rag` | A RAG agent for document retrieval and Q&A. Supporting [Vertex AI Search](https://cloud.google.com/generative-ai-app-builder/docs/enterprise-search-introduction) and [Vector Search](https://cloud.google.com/vertex-ai/docs/vector-search/overview).       |
+| `langgraph_base_react`      | An agent implementing a base ReAct agent using LangGraph |
 | `crewai_coding_crew`       | A multi-agent system implemented with CrewAI created to support coding activities       |
 | `live_api`       | A real-time multimodal RAG agent powered by Gemini, supporting audio/video/text chat with vector DB-backed responses                       |
 
 **More agents are on the way!** We are continuously expanding our [agent library](./agents/).  Have a specific agent type in mind?  [Contribute!](#contributing)
 
+**🔍 ADK Samples**
+
+Looking to explore more ADK examples? Check out the [ADK Samples Repository](https://github.com/google/adk-samples) for additional examples and use cases demonstrating ADK's capabilities.
 
 #### Extra Features
 

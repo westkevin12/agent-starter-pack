@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-You can add your unit tests here.
-"""
-
-
-def test_dummy() -> None:
-    """Placeholder - replace with real tests."""
-    assert 1 == 1
+description: "A base ReAct agent built with Google's Agent Development Kit (ADK)"
+settings:
+  requires_data_ingestion: false
+  deployment_targets: ["agent_engine", "cloud_run"]
+  extra_dependencies: ["google-adk~=0.1.0"]
+  tags: ["adk"]
+  frontend_type: "None"

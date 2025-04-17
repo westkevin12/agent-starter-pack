@@ -17,8 +17,8 @@ import logging
 from collections.abc import Sequence
 from typing import Any
 
+import google.cloud.storage as storage
 from google.cloud import logging as google_cloud_logging
-from google.cloud import storage
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
 from opentelemetry.sdk.trace import ReadableSpan
 from opentelemetry.sdk.trace.export import SpanExportResult
@@ -86,8 +86,18 @@ class CloudTraceLoggingSpanExporter(CloudTraceSpanExporter):
                 print(span_dict)
 
             # Log the span data to Google Cloud Logging
+{%- if "adk" in cookiecutter.tags %}
+            self.logger.log_struct(
+                span_dict,
+                labels={
+                    "type": "agent_telemetry",
+                    "service_name": "{{cookiecutter.project_name}}",
+                },
+                severity="INFO",
+            )
+{%- else %}
             self.logger.log_struct(span_dict, severity="INFO")
-
+{%- endif %}
         # Export spans to Google Cloud Trace using the parent class method
         return super().export(spans)
 

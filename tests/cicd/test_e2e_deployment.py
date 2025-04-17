@@ -47,6 +47,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+import backoff
 import pytest
 import vertexai
 from vertexai import agent_engines
@@ -127,6 +128,7 @@ def get_test_matrix() -> list[CICDTestConfig]:
 CICD_TEST_MATRIX: list[CICDTestConfig] = get_test_matrix()
 
 
+@backoff.on_exception(backoff.expo, subprocess.CalledProcessError, max_tries=2)
 def run_command(
     cmd: list[str],
     check: bool = True,
@@ -311,6 +313,7 @@ class TestE2EDeployment:
             failure_detail = failure_info.get("detail", "Unknown failure")
             raise Exception(f"Build {build_id} failed: {failure_detail}")
 
+    @backoff.on_exception(backoff.expo, Exception, max_tries=5)
     def monitor_deployment(
         self,
         project_id: str,

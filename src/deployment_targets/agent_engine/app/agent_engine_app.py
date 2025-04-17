@@ -12,6 +12,72 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# mypy: disable-error-code="attr-defined"
+{%- if "adk" in cookiecutter.tags %}
+import copy
+import datetime
+import json
+import logging
+import os
+from collections.abc import Mapping, Sequence
+from typing import Any
+
+import google.auth
+import vertexai
+from google.cloud import logging as google_cloud_logging
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider, export
+from vertexai import agent_engines
+from vertexai.preview.reasoning_engines import AdkApp
+
+from app.agent import root_agent
+from app.utils.gcs import create_bucket_if_not_exists
+from app.utils.tracing import CloudTraceLoggingSpanExporter
+from app.utils.typing import Feedback
+
+
+class AgentEngineApp(AdkApp):
+    def set_up(self) -> None:
+        """Set up logging and tracing for the agent engine app."""
+        super().set_up()
+        logging_client = google_cloud_logging.Client()
+        self.logger = logging_client.logger(__name__)
+        provider = TracerProvider()
+        processor = export.BatchSpanProcessor(
+            CloudTraceLoggingSpanExporter(
+                project_id=os.environ.get("GOOGLE_CLOUD_PROJECT")
+            )
+        )
+        provider.add_span_processor(processor)
+        trace.set_tracer_provider(provider)
+
+    def register_feedback(self, feedback: dict[str, Any]) -> None:
+        """Collect and log feedback."""
+        feedback_obj = Feedback.model_validate(feedback)
+        self.logger.log_struct(feedback_obj.model_dump(), severity="INFO")
+
+    def register_operations(self) -> Mapping[str, Sequence]:
+        """Registers the operations of the Agent.
+
+        Extends the base operations to include feedback registration functionality.
+        """
+        operations = super().register_operations()
+        operations[""] = operations[""] + ["register_feedback"]
+        return operations
+
+    def clone(self) -> "AgentEngineApp":
+        """Returns a clone of the ADK application."""
+        template_attributes = self._tmpl_attrs
+        return self.__class__(
+            agent=copy.deepcopy(template_attributes.get("agent")),
+            enable_tracing=template_attributes.get("enable_tracing"),
+            session_service_builder=template_attributes.get("session_service_builder"),
+            artifact_service_builder=template_attributes.get(
+                "artifact_service_builder"
+            ),
+            env_vars=template_attributes.get("env_vars"),
+        )
+{%- else %}
 import datetime
 import json
 import logging
@@ -66,7 +132,6 @@ class AgentEngineApp:
             )
         except Exception as e:
             logging.error("Failed to initialize Telemetry: %s", str(e))
-
         self.runnable = agent
 
     # Add any additional variables here that should be included in the tracing logs
@@ -107,11 +172,6 @@ class AgentEngineApp:
             dumped_chunk = dumpd(chunk)
             yield dumped_chunk
 
-    def register_feedback(self, feedback: dict[str, Any]) -> None:
-        """Collect and log feedback."""
-        feedback_obj = Feedback.model_validate(feedback)
-        self.logger.log_struct(feedback_obj.model_dump(), severity="INFO")
-
     def query(
         self,
         *,
@@ -123,6 +183,11 @@ class AgentEngineApp:
         config = ensure_valid_config(config)
         self.set_tracing_properties(config=config)
         return dumpd(self.runnable.invoke(input=input, config=config, **kwargs))
+
+    def register_feedback(self, feedback: dict[str, Any]) -> None:
+        """Collect and log feedback."""
+        feedback_obj = Feedback.model_validate(feedback)
+        self.logger.log_struct(feedback_obj.model_dump(), severity="INFO")
 
     def register_operations(self) -> Mapping[str, Sequence]:
         """Registers the operations of the Agent.
@@ -140,6 +205,7 @@ class AgentEngineApp:
             "": ["query", "register_feedback"],
             "stream": ["stream_query"],
         }
+{%- endif %}
 
 
 def deploy_agent_engine_app(
@@ -162,14 +228,19 @@ def deploy_agent_engine_app(
     # Read requirements
     with open(requirements_file) as f:
         requirements = f.read().strip().split("\n")
-
-    agent = AgentEngineApp(project_id=project, env_vars=env_vars)
-
+{% if "adk" in cookiecutter.tags %}
+    agent_engine = AgentEngineApp(
+        agent=root_agent,
+        env_vars=env_vars,
+    )
+{% else %}
+    agent_engine = AgentEngineApp(project_id=project, env_vars=env_vars)
+{% endif %}
     # Common configuration for both create and update operations
     agent_config = {
-        "agent_engine": agent,
+        "agent_engine": agent_engine,
         "display_name": agent_name,
-        "description": "This is a sample custom application in Agent Engine that uses LangGraph",
+        "description": "{{cookiecutter.agent_description}}",
         "extra_packages": extra_packages,
     }
     logging.info(f"Agent config: {agent_config}")
